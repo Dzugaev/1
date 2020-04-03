@@ -1,0 +1,12 @@
+--1--
+select st.name, st.surname
+from students st
+where st.score >4 and st.score< 4.5
+
+--3--
+select *
+from students st
+order by  (st.n_group) desc 
+-- order by st.name
+
+--4--
