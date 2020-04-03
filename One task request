@@ -38,3 +38,13 @@ group by st.surname
 select substr(st.n_group::varchar, 1,1) as grade, avg(st.score) as SC
 from  students st
 group by grade
+
+
+--6--
+select substr(st.n_group::varchar, 1,1) as grade, SC
+from  (select st.n_group, max(st.score) as SC
+	   from students st 
+	   group by st.n_group) st
+group by grade, sc
+order by sc desc
+
