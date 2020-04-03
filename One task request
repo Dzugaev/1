@@ -38,4 +38,3 @@ where st.score > 4.5
 order by st.score desc
 limit 5
 
---9--
