@@ -32,3 +32,9 @@ group by st.n_group
 select st.surname,  count(st.surname) as kolvo
 from students st
 group by st.surname
+
+
+--5--
+select substr(st.n_group::varchar, 1,1) as grade, avg(st.score) as SC
+from  students st
+group by grade
