@@ -10,3 +10,32 @@ order by  (st.n_group) desc
 -- order by st.name
 
 --4--
+select st.name, st.surname, st.score
+from students st
+where st.score >4
+order by st.score desc
+
+--5--
+select h.name,h.risk
+from hobbies h
+where h.name = 'Хоккей' or h.name = 'Футбол'
+
+--6--
+select sh.student_id, sh.hobby_id, sh.date_start
+from students_hobbies sh
+where sh.date_start 
+
+--7--
+select *
+from students st
+where st.score > 4.5
+order by st.score desc
+
+--8--
+select *
+from students st
+where st.score > 4.5
+order by st.score desc
+limit 5
+
+--9--
