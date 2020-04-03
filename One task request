@@ -1,1 +1,34 @@
+SELECT st.n_group,
+       COUNT(st.n_group) AS количество_студентов
+FROM students st
+GROUP BY st.n_group
+having count(st.n_group) >12
+/* без having 
+SELECT *
+FROM
+  (SELECT N_gr,
+          COUNT(N_gr) AS count_students
+   FROM students
+   GROUP BY N_gr)
+WHERE count_students > 12;
+*/
+SELECT  students.*, 
+       students_hobbies.*
+FROM students,
+     students_hobbies;
+where students.id= students_hobbies.id; 
 
+--1--
+select st.n_group, count(st.n_group) as kolvo_st
+from students st
+group by st.n_group
+
+--2--
+select st.n_group, max(st.score) as max
+from students st
+group by st.n_group
+
+--3--
+select st.surname,  count(st.surname) as kolvo
+from students st
+group by st.surname
