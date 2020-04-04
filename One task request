@@ -23,3 +23,34 @@ select st.*
 from students st
 inner join tab
 on st.id = tab.student_id
+
+--3--
+select st.name, st.surname, st.score, avg(st.score), sum(h.risk)
+from students st
+inner join students_hobbies sh
+on st.id=sh.student_id
+inner join hobbies h
+on h.id = sh.hobby_id
+group by st.name, st.surname, st.score
+having sum(h.risk)>0.9 and st.score>(select avg(score) from students)
+
+--4--
+select st.name, st.surname, st.id, st.birth_date, h.name, (extract (month from age (sh.date_finish, sh.date_start))+extract (year from age (sh.date_finish, sh.date_start))*12) as dlitel
+from students st
+inner join students_hobbies sh
+on st.id=sh.student_id
+inner join hobbies h
+on h.id = sh.hobby_id
+where sh.date_finish is not null
+group by st.name, st.surname, st.id, st.birth_date, h.name, dlitel
+
+--5--
+select st.name, st.surname, st.id, st.birth_date
+from students st
+inner join students_hobbies sh
+on st.id=sh.student_id
+inner join hobbies h
+on h.id = sh.hobby_id
+where (sh.date_finish is null) and (extract (year from st.birth_date ) > 1999)
+group by st.name, st.surname, st.id, st.birth_date
+having count(*) > 1
