@@ -1,1 +1,13 @@
+--1--
+select distinct st.name, st.surname, h.name
+from students st, hobbies h, students_hobbies sh
+where sh.student_id = sh.hobby_id
+group by st.name, st.surname, h.name
+order by st.surname
+/*
+select st.surname, h.name
+from students st, hobbies h, students_hobbies sh
+where st.surname = 'Дзугаев' and h.id=sh.hobby_id
+group by st.surname, h.name*/
 
+--2--
