@@ -10,4 +10,16 @@ from students st, hobbies h, students_hobbies sh
 where st.surname = 'Дзугаев' and h.id=sh.hobby_id
 group by st.surname, h.name*/
 
+
 --2--
+with tab as(
+select sh.student_id, extract (month from age (now(), sh.date_start)) as maximum
+from students_hobbies sh
+where sh.date_finish is null
+group by sh.student_id, sh.date_start
+order by maximum desc
+limit 1)
+select st.*
+from students st
+inner join tab
+on st.id = tab.student_id
