@@ -97,6 +97,27 @@ inner join t
 on st.n_group=t.n_group
 and st.score=t.m
 
+
+--11
+select t1.n_group
+from
+(select st.n_group, count(st.*) as A
+from students st
+group by st.n_group) as t1
+inner join
+(select st.n_group, count(st.*) as B
+from students st
+where st.score>=4
+group by st.n_group) as t2
+on t1.n_group=t2.n_group
+where t2.B::real/t1.A::real>=0.6;
+
+--12
+select count(h.name), st.n_group
+from students st inner join students_hobbies sh on st.id = sh.student_id inner join hobbies h on sh.hobby_id = h.id
+where sh.date_finish is null
+group by st.n_group;
+
 --16
 
 with h_c as(
