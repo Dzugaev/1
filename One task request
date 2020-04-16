@@ -132,3 +132,35 @@ where h_c.c=
 select max(c)
 from h_c
 )
+--17
+
+select st.*
+from students st
+Inner join students_hobbies sh on st.id = sh.student_id
+where sh.hooby_id = (select h.id
+					from students_hobbies sh
+					Inner join hobbies h on sh.hobby_id = h.id
+					Group by h.id
+					Order by count(sh.student_id) desc 
+					limit 1)
+					
+--18
+select sh.hobby_id
+from students_hobbies sh 
+inner join hobbies h on sh.hobby_id = h.id 
+group by sh.hobby_id, h.risk
+order by h.risk desc 
+limit 3
+
+--19
+create or replace view time as
+(select (extract (month from age (now()::date, sh.date_start))+
+extract (year from age (now()::date, sh.date_start))*12) as q
+from students_hobbies sh) 
+
+select st.name, st.surname
+from students st
+inner join students_hobbies sh on st.id = sh.student_id
+order by (q) desc
+limit 10
+
