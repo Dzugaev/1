@@ -54,3 +54,60 @@ on h.id = sh.hobby_id
 where (sh.date_finish is null) and (extract (year from st.birth_date ) > 1999)
 group by st.name, st.surname, st.id, st.birth_date
 having count(*) > 1
+
+
+--6
+with new_table as
+(select sh.student_id
+from students_hobbies sh
+where sh.date_finish is null
+Group by sh.student_id
+Having count(*)>=1)
+
+select avg(st.score),st.n_group
+from students st
+inner join new_table nt
+on st.id=nt.student_id
+Group by st.n_group
+
+--7
+select h.name, h.risk, extract(month from age(sh.date_finish,sh.date_start))+extract(year from age(sh.date_finish,sh.date_start))*12,st.n_group,
+from students_hobbies sh
+inner join students st
+on sh.student_id=st.id
+inner join hobbies h
+on sh.hobby_id=h.id
+Group by h.name, h.risk, extract(month from age(sh.date_finish,sh.date_start))+extract(year from age(sh.date_finish,sh.date_start))*12,st.n_group,
+Having extract(month from age(sh.date_finish,sh.date_start))+extract(year from age(sh.date_finish,sh.date_start))*12=
+(
+select max(extract(month from age(sh.date_finish,sh.date_start))+extract(year from age(sh.date_finish,sh.date_start))*12)
+from students_hobbies sh
+)
+
+--10 групповые
+with t as
+(
+select st.n_group,max(st.score) as m
+from students st
+Group by st.n_group
+)
+select st.*
+from students st
+inner join t
+on st.n_group=t.n_group
+and st.score=t.m
+
+--16
+
+with h_c as(
+select sh.hobby_id, count(*)as c
+from students_hobbies sh
+Group by sh.hobby_id
+)
+Select h_c.hobby_id
+from h_c
+where h_c.c=
+(
+select max(c)
+from h_c
+)
