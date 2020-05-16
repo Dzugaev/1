@@ -3,3 +3,8 @@ CREATE TABLE tt (
   name varchar,
   code bigint UNIQUE
 )
+
+CREATE TABLE cc (
+  id SERIAL PRIMARY KEY,
+  attr bigint
+)
