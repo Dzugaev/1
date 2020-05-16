@@ -7,9 +7,14 @@ CREATE TABLE tt (
 CREATE TABLE bb (
   id SERIAL PRIMARY KEY,
   test varchar
-)
+);
 
 CREATE TABLE cc (
   id SERIAL PRIMARY KEY,
   attr bigint
-)
+);
+
+CREATE TABLE ff (
+  id SERIAL PRIMARY KEY,
+  attr bigint
+);
