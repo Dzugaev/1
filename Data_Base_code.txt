@@ -1,0 +1,269 @@
+CREATE TABLE departmens (
+id serial PRIMARY KEY,
+name varchar(255),
+city varchar(100),
+date_start date ,
+description varchar(255)
+)
+CREATE TABLE product (
+id serial PRIMARY KEY,
+name varchar(255),
+current_price integer,
+description varchar(255)
+)
+CREATE TABLE employee (
+id serial PRIMARY KEY,
+name varchar(255),
+sername varchar(255),
+citi varchar(255),
+street varchar(255),
+address integer,
+dste_birth date
+)
+CREATE TABLE supplier (
+id serial PRIMARY KEY,
+name varchar(255),
+address varchar(100),
+number varchar(20),
+email varchar(100)
+)
+CREATE TABLE client (
+id serial PRIMARY KEY,
+name varchar(255),
+sername varchar(255),
+email varchar(100),
+number integer
+)
+CREATE TABLE supplier_staff (
+id serial PRIMARY KEY,
+supplier_id integer REFERENCES supplier(id),
+name varchar(255),
+price integer,
+quantity integer
+)
+CREATE TABLE discount_stuff (
+id serial PRIMARY KEY,
+product_id integer REFERENCES product(id),
+name varchar(255),
+date_start date,
+date_finish date,
+type varchar(100),
+price integer,
+quantity integer
+)
+CREATE TABLE product_quality (
+id serial PRIMARY KEY,
+product_id integer REFERENCES product(id),
+category varchar(100),
+desscripion varchar(100)
+)
+CREATE TABLE prise_story (
+id serial PRIMARY KEY,
+product_id integer REFERENCES product(id),
+price integer,
+date_start date,
+date_finish date
+
+)
+CREATE TABLE discount_client (
+id serial PRIMARY KEY,
+client_id integer REFERENCES client(id),
+name varchar(255),
+date_start date,
+date_finish date,
+type varchar(100)
+
+)
+CREATE TABLE shop (
+id serial PRIMARY KEY,
+employee_id integer REFERENCES employee(id),
+name varchar(255),
+date_start date,
+date_finish date,
+citi varchar(255),
+street varchar(255),
+address integer
+)
+CREATE TABLE department_branch (
+id serial PRIMARY KEY,
+employee_id integer REFERENCES employee(id),
+department_id integer REFERENCES departmens(id),
+name varchar(255),
+date_start date,
+description varchar(100)
+
+)
+CREATE TABLE staff_data (
+id serial PRIMARY KEY,
+employee_id integer REFERENCES employee(id),
+date_start date,
+date_finish date,
+shedule varchar(100)
+)
+CREATE TABLE shop_product (
+id serial PRIMARY KEY,
+shop_id integer REFERENCES shop(id),
+product_id integer REFERENCES product(id),
+supplier_id integer REFERENCES supplier(id),
+employee_id integer REFERENCES employee(id),
+quantity_shop integer,
+quantity_warehouse integer
+
+)
+CREATE TABLE client_buys (
+id serial PRIMARY KEY,
+client_id integer REFERENCES client(id),
+shop_product_id integer REFERENCES shop_product(id),
+date_buy date
+)
+insert into client (name, surname, phone, email)
+values
+( 'Петров', 'Петр', '88005553503', 'petrov@gmail.com'),
+( 'Иванов', 'Иван', '88005553504' ,'ivanov@gmail.com'),
+( 'Соломин', 'Валерий', '88005553505', 'watson@gmail.com'),
+( 'Сабуров', 'Нурлан', '88005553506' ,'labelcom@gmail.com'),
+( 'Козловский', 'Данила', '88005553507', 'kozlovski@gmail.com'),
+( 'Масаев', 'Тамби', '88005553508' ,'tambyr@gmail.com'),
+( 'Баженов', 'Евгений', '88005553509', 'bad@gmail.com'),
+( 'Зеленая', 'Рина', '88005553510' ,'rinazelenaya@gmail.com')
+select *
+from client
+
+insert into department (name, date_start, description) values 
+( 'Pearl Harbor', '1930-02-02', 'Отдел международных отношений'),
+( 'Gelikelier', '2008-05-11', 'Отдел воздушных перевозок'),
+( 'Diamond', '2015-12-21', 'Отдел работы с персоналом'),
+( 'Guantanamo', '1923-08-25', 'Отдел учета продукции'),
+( 'Nortfolk', '1933-06-01', 'Отдел учета учетов'),
+( 'Sevastopol', '1966-08-16', 'Отдел по вопросам отпусков'),
+( 'Rammstein', '1980-10-21', 'Отдел связи с немекцими партенами'),
+( 'Crystal', '2001-01-30', 'Самый важный отдел'),
+( 'Korusant', '1999-05-04', 'Отдел по делам академии')
+
+
+select *
+from employee
+insert into employee (name, surname, city, street, address, phone, date_birth, email) values 
+('Баженов','Григорий','Дубна','Ителлектуалов','141','89091230321','2000-01-01','bazhenov@gmail.com'),
+('Головина','Екатерина','Алушта','Энтузиастов','112','89091112202','2001-01-30','golovina@gmail.com'),
+('Дзугаев','Михаил','Владикавказ','Энтузиастов','634','89091112203','2000-08-25','dzugaev@gmail.com'),
+('Жихарев','Роман','Дубна','Ленина','22','89091112204','2000-03-03','ziharev@gmail.com'),
+('Печников','Даниил','Ефремов','Ленина','13','89091112205','1960-04-22','ded@gmail.com'),
+('Попов','Илия','Сыктывкар','Энтузиастов','423','89091112206','1999-02-13','popov@gmail.com'),
+('Сергеев','Сергей','Новочебоксарск', 'Энтузиастов','934','89091112207','2000-11-30','sss@gmail.com'),
+('Трефанюк','Артем','Алушта','Энтузиастов','814','89091112210','2001-08-30','artem@gmail.com'),
+('Фролова','Дарья','Дубна','Какая-то','666','89091112208','1999-01-10','frolova@gmail.com'),
+('Широких','Егор','Ефремов','Ленина','13','89091112209','2000-09-01','shirokih@gmail.com')
+
+insert into product (name, description, current_price) values
+('Антисептик','CoronaStop','200'),
+('Туалетная бумага','Zeva','100'),
+('Гречневая крупа','Увелка','89'),
+('Макароны','Barrila','60'),
+('Шоколадка','Шарлиз','90'),
+('Зубная паста','Colgate','134'),
+('Арахисовая паста','Шарлиз','201'),
+('Салфетки','Zeva','30'),
+('Вино','Robertson-Winory','500'),
+('Сигареты','Беломор канал','90')
+select* from product
+
+insert into supplier (name, address, phone, email) values
+('Соло','Татуинская 66','89876543210','han@gmail.com'),
+('Лэндо','Беспин 134','89876543211','calrisian@gmail.com'),
+('Барла Вон','Президиум 24','89876543212','von@gmail.com'),
+('Карт Онаси','Малакор 5','89876543213','cart@gmail.com'),
+('Дрейден Вос','Ленина 17','89876543214','vos@gmail.com'),
+('Пайк','Сталина 45','89876543215','pyik@gmail.com'),
+('Джоэл','Светлячкова 26','89876543216','joel@gmail.com'),
+('Опольд','Ханаров 211','89876543217','opold@gmail.com'),
+('Лорик Кин','Новая 8','89876543218','kin@gmail.com'),
+('Чуи','Татуинская 66','89876543219','chewbacca@gmail.com')
+select * from supplier
+
+insert into staff_data (employee_id, shedule, date_start, date_finish) values
+('2','3/1','2018-11-13',null),
+('3','2/2','2020-06-22',null),
+('4','5/2','2019-08-30','2020-05-01'),
+('5','6/1','2015-12-10',null),
+('6','3/1','2016-11-07',null),
+('7','2/2','2019-03-09',null),
+('8','2/2','2018-08-18',null),
+('9','5/2','2017-10-27','2019-11-21'),
+('10','5/2','2019-04-15',null)
+select * from department
+
+insert into department_branch (department_id, employee_id, name, date_start) values
+('1','1','mother_left','2000-04-04'),
+('1','2','mothert_right','2000-05-14'),
+('2','3','father_left','2001-05-14'),
+('2','1','fathert_right','2002-05-14'),
+('3','6','Perl_left','2001-05-14'),
+('3','8','Perl_right','2003-05-14'),
+('4','4','Gelikelier_left','2004-05-14'),
+('4','2','Gelikelier_right','2002-05-14'),
+('5','8','Diamond_left','2002-05-14'),
+('5','7','Diamond_right','2002-05-14'),
+('6','5','Guantanamo_left','2002-05-14'),
+('6','3','Guantanamot_right','2005-05-14'),
+('7','4','Nortfolk_left','2005-05-14'),
+('7','9','Nortfolk_right','2005-05-14'),
+('8','10','Sevastopol_left','2003-05-14'),
+('8','5','Sevastopol_right','2004-05-14'),
+('9','10','Rammstein_left','2002-04-04'),
+('9','7','Rammstein_right','2005-05-14'),
+('10','5','Crystal_left','2001-05-14'),
+('10','6','Crystal_right','2001-05-14'),
+('11','9','Korusant_left','1999-05-14'),
+('11','3','Korusan_right','1999-04-04')
+
+insert into discount_client (client_id, type, name, date_start, date_finish) values
+('2','общая','15% на сладкое','2020-02-20','2020-06-01'),
+('1','индивидуальная','15% на всю продукцию','2020-02-20',null),
+('3','общая','15% на сладкое','2020-02-20','2020-06-01'),
+('4','общая','15% на сладкое','2020-02-20','2020-06-01'),
+('11','индивидуальная','15% на всю продукцию','2020-02-20',null),
+('7','индивидуальная','15% на всю продукцию', '2020-02-20', '2020-06-01'),
+('5','общая','15% насладкое','2020-03-01','2020-08-01'),
+('9','индивидуальная','15% на всю продукцию','2020-02-20','2020-06-01'),
+('6','общая','15% сладкое','2020-03-01','2020-08-01'),
+('8','общая','15% сладкое','2020-03-01','2020-08-01'),
+('10','индивидуальная','15% на всю продукцию','2020-02-20','2020-08-01')
+
+insert into discount_stuff (product_id, type, name, date_start, date_finish) values
+('1','общая','5%','2020-02-21','2020-08-01'),
+('7','индивидуальная','15%','2020-02-20',' 2020-05-11'),
+('3','общая','20%','2020-02-20','2020-06-01'),
+('2','общая','20%','2020-02-20','2020-06-01'),
+('5','индивидуальная','15%','2020-02-20',' 2020-05-11'),
+('8','общая','10% насладкое','2020-03-01','2020-04-01'),
+('4','общая','10%','2020-03-01','2020-07-01')
+
+
+insert into supplier_stuff (supplier_id, quantity, name, price, description) values
+('1','2000','Антисептик','150','CoronaStop'),
+('1','2000','Макароны','55','Barrila'),
+('2','500','Шоколадка','49','Шарлиз'),
+('3','200','Зубная пасата','100','Colgate'),
+('4','400','Туалетная бумага','60','Zeva'),
+('5','1000','Салфетки','15','Zeva'),
+('6','175','Арахисовая паста','115','Шарлиз'),
+('7','300','Вино','350','Robertson-winory'),
+('8','900','Сигареты','20','Беломор канал'),
+('9','450','Вино','400','Robertson-winory'),
+('10','6000','Гречневая крупа','60','Увелка'),
+('10','2000','Антисептик','150','CoronaStop')
+
+insert into shop (employee_id, city, street, address, date_start, date_finish) values
+(null,'Дубна','Боголюбова','47','2005-05-06',null),
+(null,'Дубна','Боголюбова','156','2006-02-12',null),
+(null,'Дубна','Мичурина','41','2006-12-01',null),
+(null,'Москва','Кракова','14','2012-08-25',null),
+(null,'Москва','Проспект Большевиков','23','2014-05-24',null),
+(null,'Москва','Тверская','100','2013-05-01',null),
+(null,'Питер','Невский проспект','100','2016-07-16',null),
+(null,'Дубна','Программистов','12','2009-10-01',null),
+(null,'Дубна','Ленина','78','2007-03-11',null),
+(null,'Дубна','Боголюбова','212','2005-05-01',null),
+(null,'Воронеж','Краснознаменская','35','2010-05-01','2020-04-01')
+
