@@ -1,46 +1,74 @@
-CREATE TABLE departmens (
+DROP TABLE client CASCADE CONSTRAINTS
+DROP TABLE client_byus CASCADE CONSTRAINTS
+DROP TABLE department CASCADE 
+DROP TABLE department_branch 
+DROP TABLE discount_client CASCADE
+DROP TABLE discount_stuff CASCADE
+DROP TABLE employee CASCADE
+DROP TABLE price_story CASCADE
+DROP TABLE product CASCADE
+DROP TABLE product_quality CASCADE
+DROP TABLE shop CASCADE
+DROP TABLE shop_product CASCADE 
+DROP TABLE supplier CASCADE
+DROP TABLE supplier_stuff CASCADE
+DROP TABLE client_buys CASCADE 
+DROP TABLE shipment CASCADE 
+DROP TABLE shop_employee CASCADE 
+DROP TABLE warehouse CASCADE 
+
+
+
+CREATE TABLE department (
 id serial PRIMARY KEY,
 name varchar(255),
 city varchar(100),
 date_start date ,
 description varchar(255)
 )
+
 CREATE TABLE product (
 id serial PRIMARY KEY,
 name varchar(255),
-current_price integer,
-description varchar(255)
+current_price integer
 )
+
 CREATE TABLE employee (
 id serial PRIMARY KEY,
 name varchar(255),
-sername varchar(255),
-citi varchar(255),
+surname varchar(255),
+city varchar(255),
 street varchar(255),
-address integer,
-dste_birth date
+address varchar(255),
+phone varchar(255),
+date_birth date,
+email varchar(255)
 )
+
 CREATE TABLE supplier (
 id serial PRIMARY KEY,
 name varchar(255),
 address varchar(100),
-number varchar(20),
+phone varchar(20),
 email varchar(100)
 )
+
 CREATE TABLE client (
 id serial PRIMARY KEY,
 name varchar(255),
-sername varchar(255),
+surname varchar(255),
 email varchar(100),
-number integer
+phone varchar(255)
 )
-CREATE TABLE supplier_staff (
+
+CREATE TABLE supplier_stuff (
 id serial PRIMARY KEY,
 supplier_id integer REFERENCES supplier(id),
 name varchar(255),
 price integer,
 quantity integer
 )
+
 CREATE TABLE discount_stuff (
 id serial PRIMARY KEY,
 product_id integer REFERENCES product(id),
@@ -48,23 +76,23 @@ name varchar(255),
 date_start date,
 date_finish date,
 type varchar(100),
-price integer,
-quantity integer
 )
+
 CREATE TABLE product_quality (
 id serial PRIMARY KEY,
 product_id integer REFERENCES product(id),
-category varchar(100),
-desscripion varchar(100)
+category varchar(100), --белки
+description varchar(100) --8.9
 )
-CREATE TABLE prise_story (
+
+CREATE TABLE price_story (
 id serial PRIMARY KEY,
 product_id integer REFERENCES product(id),
 price integer,
 date_start date,
 date_finish date
-
 )
+
 CREATE TABLE discount_client (
 id serial PRIMARY KEY,
 client_id integer REFERENCES client(id),
@@ -72,50 +100,74 @@ name varchar(255),
 date_start date,
 date_finish date,
 type varchar(100)
+)
 
-)
 CREATE TABLE shop (
-id serial PRIMARY KEY,
-employee_id integer REFERENCES employee(id),
-name varchar(255),
-date_start date,
-date_finish date,
-citi varchar(255),
-street varchar(255),
-address integer
+	id serial PRIMARY KEY,	
+	name varchar(255),
+	date_start date,
+	date_finish date,
+	city varchar(255),
+	street varchar(255),
+	address integer
 )
+
 CREATE TABLE department_branch (
 id serial PRIMARY KEY,
 employee_id integer REFERENCES employee(id),
-department_id integer REFERENCES departmens(id),
+department_id integer REFERENCES department(id),
 name varchar(255),
 date_start date,
 description varchar(100)
-
 )
-CREATE TABLE staff_data (
+
+CREATE TABLE shop_employee (
 id serial PRIMARY KEY,
+shop_id integer REFERENCES shop(id),
 employee_id integer REFERENCES employee(id),
 date_start date,
 date_finish date,
-shedule varchar(100)
+shedule varchar(255)
 )
+
+create table shipment (
+    id serial PRIMARY KEY,
+	shop_id integer REFERENCES shop(id),
+	employee_id integer REFERENCES employee(id),
+	supplier_stuff_id integer REFERENCES supplier_stuff (id),
+	quantity integer
+)
+
 CREATE TABLE shop_product (
-id serial PRIMARY KEY,
-shop_id integer REFERENCES shop(id),
-product_id integer REFERENCES product(id),
-supplier_id integer REFERENCES supplier(id),
-employee_id integer REFERENCES employee(id),
-quantity_shop integer,
-quantity_warehouse integer
+	id serial PRIMARY KEY,
+	shop_id integer REFERENCES shop(id),
+	product_id integer REFERENCES product(id),
+	quantity integer
 
 )
 CREATE TABLE client_buys (
-id serial PRIMARY KEY,
-client_id integer REFERENCES client(id),
-shop_product_id integer REFERENCES shop_product(id),
-date_buy date
+	id serial PRIMARY KEY,
+	client_id integer REFERENCES client(id),
+	shop_product_id integer REFERENCES shop_product(id),
+	date_buy timestamp
+--quantity?
 )
+
+create table shipment (
+   	 id serial PRIMARY KEY,
+	shop_id integer REFERENCES shop(id),
+	employee_id integer REFERENCES employee(id),
+	supplier_stuff_id integer REFERENCES supplier_stuff (id),
+date_shipment date,
+	quantity integer
+)
+
+create table warehouse (
+	id serial PRIMARY KEY,
+	product_id integer REFERENCES product(id),
+	quantity integer
+	)
+
 insert into client (name, surname, phone, email)
 values
 ( 'Петров', 'Петр', '88005553503', 'petrov@gmail.com'),
@@ -129,7 +181,9 @@ values
 select *
 from client
 
-insert into department (name, date_start, description) values 
+insert into department (name, date_start, cityblyat description) values 
+( 'Mother Base', '1930-02-02', 'Why are we still here?'),
+( 'Father Base', '1930-02-02', 'Just for suffer?'),
 ( 'Pearl Harbor', '1930-02-02', 'Отдел международных отношений'),
 ( 'Gelikelier', '2008-05-11', 'Отдел воздушных перевозок'),
 ( 'Diamond', '2015-12-21', 'Отдел работы с персоналом'),
@@ -155,18 +209,18 @@ insert into employee (name, surname, city, street, address, phone, date_birth, e
 ('Фролова','Дарья','Дубна','Какая-то','666','89091112208','1999-01-10','frolova@gmail.com'),
 ('Широких','Егор','Ефремов','Ленина','13','89091112209','2000-09-01','shirokih@gmail.com')
 
-insert into product (name, description, current_price) values
-('Антисептик','CoronaStop','200'),
-('Туалетная бумага','Zeva','100'),
-('Гречневая крупа','Увелка','89'),
-('Макароны','Barrila','60'),
-('Шоколадка','Шарлиз','90'),
-('Зубная паста','Colgate','134'),
-('Арахисовая паста','Шарлиз','201'),
-('Салфетки','Zeva','30'),
-('Вино','Robertson-Winory','500'),
-('Сигареты','Беломор канал','90')
-select* from product
+insert into product (name, current_price) values
+('Антисептик','200'),
+('Туалетная бумага','100'),
+('Гречневая крупа','89'),
+('Макароны','60'),
+('Шоколадка','90'),
+('Зубная паста','134'),
+('Арахисовая паста','201'),
+('Салфетки','30'),
+('Вино','500'),
+('Сигареты','90')
+
 
 insert into supplier (name, address, phone, email) values
 ('Соло','Татуинская 66','89876543210','han@gmail.com'),
@@ -181,23 +235,34 @@ insert into supplier (name, address, phone, email) values
 ('Чуи','Татуинская 66','89876543219','chewbacca@gmail.com')
 select * from supplier
 
-insert into staff_data (employee_id, shedule, date_start, date_finish) values
-('2','3/1','2018-11-13',null),
-('3','2/2','2020-06-22',null),
-('4','5/2','2019-08-30','2020-05-01'),
-('5','6/1','2015-12-10',null),
-('6','3/1','2016-11-07',null),
-('7','2/2','2019-03-09',null),
-('8','2/2','2018-08-18',null),
-('9','5/2','2017-10-27','2019-11-21'),
-('10','5/2','2019-04-15',null)
-select * from department
+insert into shop_employee (shop_id, employee_id, shedule, date_start, date_finish) values
+('1','2','Понедельник Вторник Среда Четверг Пятница','2018-11-13',null),
+('2','3','Понедельник Вторник Среда Четверг Пятница','2020-06-22',null),
+('3','4','Понедельник Вторник Среда Четверг Пятница','2019-08-30',null),
+('4','5','Понедельник Вторник Среда Четверг Пятница','2015-12-10',null),
+('5','6','Понедельник Вторник Среда Четверг Пятница','2016-11-07',null),
+('6','7','Понедельник Вторник Среда Четверг Пятница','2019-03-09',null),
+('7','8','Понедельник Вторник Среда Четверг Пятница','2018-08-18',null),
+('8','9','Суббота Воскресенье','2017-10-27',null),
+('9','10','Суббота Воскресенье','2019-04-15',null),
+('10,'1','Суббота Воскресенье','2019-04-15',null),
+('1','10','Понедельник Вторник Среда Четверг Пятница','2018-11-13',null),
+('2','9','Понедельник Вторник Среда Четверг Пятница','2020-06-22',null),
+('3','8','Суббота Воскресенье','2019-08-30',null),
+('4','7','Суббота Воскресенье','2015-12-10',null),
+('5','6','Суббота Воскресенье','2016-11-07',null),
+('6','5','Суббота Воскресенье','2019-03-09',null),
+('7','4','Суббота Воскресенье','2018-08-18',null),
+('8','3','Суббота Воскресенье','2017-10-27',null),
+('9','2','Суббота Воскресенье','2019-04-15',null),
+('10,'1','Понедельник Вторник Среда Четверг Пятница','2019-04-15',null)
+
 
 insert into department_branch (department_id, employee_id, name, date_start) values
-('1','1','mother_left','2000-04-04'),
-('1','2','mothert_right','2000-05-14'),
-('2','3','father_left','2001-05-14'),
-('2','1','fathert_right','2002-05-14'),
+('1','1','Mother_left','2000-04-04'),
+('1','2','Mothert_right','2000-05-14'),
+('2','3','Father_left','2001-05-14'),
+('2','1','Fathert_right','2002-05-14'),
 ('3','6','Perl_left','2001-05-14'),
 ('3','8','Perl_right','2003-05-14'),
 ('4','4','Gelikelier_left','2004-05-14'),
@@ -236,34 +301,34 @@ insert into discount_stuff (product_id, type, name, date_start, date_finish) val
 ('3','общая','20%','2020-02-20','2020-06-01'),
 ('2','общая','20%','2020-02-20','2020-06-01'),
 ('5','индивидуальная','15%','2020-02-20',' 2020-05-11'),
-('8','общая','10% насладкое','2020-03-01','2020-04-01'),
+('8','общая','10%','2020-03-01','2020-04-01'),
 ('4','общая','10%','2020-03-01','2020-07-01')
 
 
-insert into supplier_stuff (supplier_id, quantity, name, price, description) values
-('1','2000','Антисептик','150','CoronaStop'),
-('1','2000','Макароны','55','Barrila'),
-('2','500','Шоколадка','49','Шарлиз'),
-('3','200','Зубная пасата','100','Colgate'),
-('4','400','Туалетная бумага','60','Zeva'),
-('5','1000','Салфетки','15','Zeva'),
-('6','175','Арахисовая паста','115','Шарлиз'),
-('7','300','Вино','350','Robertson-winory'),
-('8','900','Сигареты','20','Беломор канал'),
-('9','450','Вино','400','Robertson-winory'),
-('10','6000','Гречневая крупа','60','Увелка'),
-('10','2000','Антисептик','150','CoronaStop')
+insert into supplier_stuff (supplier_id, quantity, name, price) values
+('1','2000','Антисептик','150'),
+('1','2000','Спагетти','55'),
+('2','500','Шоколад','49'),
+('3','200','Зубная пасата','100'),
+('4','400','Туалетная бумага','60'),
+('5','1000','Салфетки','15'),
+('6','175','Арахисовая паста','115'),
+('7','300','Вино','350'),
+('8','900','Сигареты','20'),
+('9','450','Вино','400'),
+('10','6000','Гречневая крупа','60'),
+('10','2000','Антисептик','150')
 
-insert into shop (employee_id, city, street, address, date_start, date_finish) values
-(null,'Дубна','Боголюбова','47','2005-05-06',null),
-(null,'Дубна','Боголюбова','156','2006-02-12',null),
-(null,'Дубна','Мичурина','41','2006-12-01',null),
-(null,'Москва','Кракова','14','2012-08-25',null),
-(null,'Москва','Проспект Большевиков','23','2014-05-24',null),
-(null,'Москва','Тверская','100','2013-05-01',null),
-(null,'Питер','Невский проспект','100','2016-07-16',null),
-(null,'Дубна','Программистов','12','2009-10-01',null),
-(null,'Дубна','Ленина','78','2007-03-11',null),
-(null,'Дубна','Боголюбова','212','2005-05-01',null),
-(null,'Воронеж','Краснознаменская','35','2010-05-01','2020-04-01')
+insert into shop (city, street, address, date_start, date_finish) values
+('Дубна','Боголюбова','47','2005-05-06',null),
+('Дубна','Боголюбова','156','2006-02-12',null),
+('Дубна','Мичурина','41','2006-12-01',null),
+('Москва','Кракова','14','2012-08-25',null),
+('Москва','Проспект Большевиков','23','2014-05-24',null),
+('Москва','Тверская','100','2013-05-01',null),
+('Питер','Невский проспект','100','2016-07-16',null),
+('Дубна','Программистов','12','2009-10-01',null),
+('Дубна','Ленина','78','2007-03-11',null),
+('Дубна','Боголюбова','212','2005-05-01',null),
+('Воронеж','Краснознаменская','35','2010-05-01',null)
 
