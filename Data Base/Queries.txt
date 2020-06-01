@@ -1,0 +1,7 @@
+--1
+select s.date_start
+from shop s
+where city = 'Дубна' and date_start > current_date 
+order by date_start asc
+limit 1
+
