@@ -5,3 +5,212 @@ where city = 'Дубна' and date_start > current_date
 order by date_start asc
 limit 1
 
+--2 Для заданного магазина вывести расписание работы его сотрудников на завтрашний день.
+--shop#1, завтра - Вторник
+select e.name, e.surname, se.day_shedule
+from employee e, shop_employee se
+-- inner join shop_employee se on se.employee_id = e.id
+where se.shop_id = '1' and se.employee_id = e.id and se.shedule like '%Вторник%'
+group by e.name, e.surname, se.day_shedule
+
+--3 Выведите клиентов, которые в любых магазинах компании за последние 14 дней потратили более 10000 рублей на покупки. (Больше 2000 рублей)
+with buy_sum as
+(
+	select cl.id as client_id , cl.name, cl.surname, clb.date_buy, sum (clb.quantity*pr.current_price) as total
+	from client_buys clb
+	inner join shop_product shp on shp.id = clb.shop_product_id
+	inner join product pr on pr.id = shp.product_id
+	inner join client cl on clb.client_id = cl.id 
+	where clb.client_id = cl.id 
+	group by   cl.id, cl.name, cl.surname, clb.date_buy
+	order by cl.id
+)
+select bs.name, bs.surname
+from buy_sum bs
+where total > 2000 and (current_date - date_buy::date)<14
+
+--4 Выведите 25% (можете увеличить процент) клиентов, которые потратили за последние 240 часов наибольшую сумму.
+with buy_sum as
+(
+	select cl.id as client_id , cl.name, cl.surname, clb.date_buy, sum (clb.quantity*pr.current_price) as total
+	from client_buys clb
+	inner join shop_product shp on shp.id = clb.shop_product_id
+	inner join product pr on pr.id = shp.product_id
+	inner join client cl on clb.client_id = cl.id 
+	where (clb.client_id = cl.id) and ((current_date - clb.date_buy::date)*24 + extract( hour from date_buy) < 240)
+	group by   cl.id, cl.name, cl.surname, clb.date_buy
+	order by cl.id
+)
+select  *
+from buy_sum bs
+order by total desc
+limit  (select (count(*)*25)/100 from buy_sum)
+
+--5 На основе предыдущего запроса (сделайте его WITH) посчитайте среднюю сумму, потраченную этими клиентами.
+with last_z as (
+with buy_sum as
+(
+	select cl.id as client_id , cl.name, cl.surname, clb.date_buy, sum (clb.quantity*pr.current_price) as total
+	from client_buys clb
+	inner join shop_product shp on shp.id = clb.shop_product_id
+	inner join product pr on pr.id = shp.product_id
+	inner join client cl on clb.client_id = cl.id 
+	where (clb.client_id = cl.id) and ((current_date - clb.date_buy::date)*24 + extract( hour from date_buy) < 240)
+	group by   cl.id, cl.name, cl.surname, clb.date_buy
+	order by cl.id
+)
+select  bs.total
+from buy_sum bs
+order by total desc
+limit  (select (count(*)*25)/100 from buy_sum)
+)
+select avg(lz.total) as total_avg
+from last_z lz
+
+
+--6 За последние 4 недели выведите проданное количество единиц товара (Названия атрибутов: ID, Название товара, 1, 2, 3, 4 недели). 
+select pr.id, pr.name, w1.total as week1, w2.total as week2, w3.total as week3, w4.total as week4
+from product pr
+LEFT JOIN (
+	select  pr.id as w1id, sum(wth.quantity) as total
+	from product pr, (	select pr.id as wthid, clb.quantity   
+					from product pr
+					inner join shop_product shp on pr.id = shp.product_id
+					inner join client_buys clb on shp.id = clb.shop_product_id
+					where ((current_date - clb.date_buy::date) <=7)) as wth
+	where pr.id = wth.wthid
+	group by  pr.name, pr.id
+	order by pr.id) as w1 
+ON pr.id = w1.w1id
+LEFT JOIN (
+	select pr.id as w1id,  sum(wth.quantity)as total
+	from product pr, (	select pr.id as wthid, clb.quantity   
+					from product pr
+					inner join shop_product shp on pr.id = shp.product_id
+					inner join client_buys clb on shp.id = clb.shop_product_id
+					where (current_date - clb.date_buy::date) > 7 and ((current_date - clb.date_buy::date) <=14) ) as wth
+	where pr.id = wth.wthid
+	group by  pr.name, pr.id
+	order by pr.id) as w2
+ON pr.id = w2.w1id
+LEFT JOIN (
+	select pr.id as w1id, sum(wth.quantity)as total
+	from product pr, (	select pr.id as wthid, clb.quantity   
+					from product pr
+					inner join shop_product shp on pr.id = shp.product_id
+					inner join client_buys clb on shp.id = clb.shop_product_id
+					where (current_date - clb.date_buy::date) > 14 and ((current_date - clb.date_buy::date) <=21) ) as wth
+	where pr.id = wth.wthid
+	group by  pr.name, pr.id
+	order by pr.id) as w3
+ON pr.id = w3.w1id
+LEFT JOIN (
+	select  pr.id as w1id, sum(wth.quantity)as total
+	from product pr, (	select pr.id as wthid, clb.quantity   
+					from product pr
+					inner join shop_product shp on pr.id = shp.product_id
+					inner join client_buys clb on shp.id = clb.shop_product_id
+					where (current_date - clb.date_buy::date) > 21 and ((current_date - clb.date_buy::date) <=28) ) as wth
+	where pr.id = wth.wthid
+	group by  pr.name, pr.id
+	order by pr.id)as w4
+ON pr.id = w4.w1id
+group by pr.id, pr.name, w1.total, w2.total, w3.total, w4.total
+order by pr.id
+
+-- 7 Сравните количество единиц товара на складе с полученными в результате предыдущего запроса данными. 
+--Вывести нужно те товары и их количество, которого не хватит на неделю исходя из статистики 4-х прошедших недель.
+with six as (
+select pr.id, pr.name, w1.total as week1, w2.total as week2, w3.total as week3, w4.total as week4
+from product pr
+LEFT JOIN (
+	select  pr.id as w1id, (sum(wth.quantity) + 0) as total
+	from product pr, (	select pr.id as wthid, clb.quantity   
+					from product pr
+					inner join shop_product shp on pr.id = shp.product_id
+					inner join client_buys clb on shp.id = clb.shop_product_id
+					where ((current_date - clb.date_buy::date) <=7)) as wth
+	where pr.id = wth.wthid
+	group by  pr.name, pr.id
+	order by pr.id) as w1 
+ON pr.id = w1.w1id
+LEFT JOIN (
+	select pr.id as w1id,  (sum(wth.quantity) + 0) as total
+	from product pr, (	select pr.id as wthid, clb.quantity   
+					from product pr
+					inner join shop_product shp on pr.id = shp.product_id
+					inner join client_buys clb on shp.id = clb.shop_product_id
+					where (current_date - clb.date_buy::date) > 7 and ((current_date - clb.date_buy::date) <=14) ) as wth
+	where pr.id = wth.wthid
+	
+	group by  pr.name, pr.id
+	order by pr.id) as w2
+ON pr.id = w2.w1id
+LEFT JOIN (
+	select pr.id as w1id, ( sum(wth.quantity) + 0) as total
+	from product pr, (	select pr.id as wthid, clb.quantity   
+					from product pr
+					inner join shop_product shp on pr.id = shp.product_id
+					inner join client_buys clb on shp.id = clb.shop_product_id
+					where (current_date - clb.date_buy::date) > 14 and ((current_date - clb.date_buy::date) <=21) ) as wth
+	where pr.id = wth.wthid
+	group by  pr.name, pr.id
+	order by pr.id) as w3
+ON pr.id = w3.w1id
+LEFT JOIN (
+	select  pr.id as w1id,  (sum(wth.quantity) + 0) as total
+	from product pr, (	select pr.id as wthid, clb.quantity   
+					from product pr
+					inner join shop_product shp on pr.id = shp.product_id
+					inner join client_buys clb on shp.id = clb.shop_product_id
+					where (current_date - clb.date_buy::date) > 21 and ((current_date - clb.date_buy::date) <=28) ) as wth
+	where pr.id = wth.wthid
+	group by  pr.name, pr.id
+	order by pr.id)as w4
+ON pr.id = w4.w1id
+group by pr.id, pr.name, w1.total, w2.total, w3.total, w4.total
+order by pr.id
+) 
+select w.id, w.product_id, w.quantity
+from warehouse w
+inner join six s on w.product_id = s.id
+where (COALESCE(s.week1, 0)+ COALESCE(s.week2, 0) + COALESCE(s.week3, 0) + COALESCE(s.week4, 0))> w.quantity
+--or
+--where  (COALESCE(s.week1, 0)>=> w.quantity or (COALESCE(s.week2, 0)>=> w.quantity or (COALESCE(s.week3, 0)>=> w.quantity or (COALESCE(s.week4, 0)>=> w.quantity
+--or
+--where ((COALESCE(s.week1, 0)+ COALESCE(s.week2, 0) + COALESCE(s.week3, 0) + COALESCE(s.week4, 0))/4) > w.quantity
+group by w.id
+
+
+--8 Для заданного сотрудника выведите его месячный график работы.
+select e.name, e.surname, se.shedule, se.day_shedule
+from employee e
+inner join shop_employee se on e.id = se.employee_id 
+where e.id = 1
+
+
+--12 Для заданного поставщика выведите в заданном магазине сотрудника, который принимал их товар наибольшее количество раз. "Solo" shop-1
+
+	select e.name, e.surname, count(*) as times
+	from employee e
+	inner join shipment ship on ship.employee_id = e.id
+	inner join supplier_stuff sus on sus.id = ship.supplier_stuff_id
+	inner join supplier su on su.id = sus.supplier_id
+	where ship.shop_id = 1 and su.name = 'Соло' 
+	group by e.name, e.surname
+	order by times desc
+	limit 1 
+
+--15 Появилась задача хранить зарплаты сотрудников. Подумайте, как можно это хранить и напишите запрос для изменения базы данных. 
+--Бухгалтерия сообщила, что самая распространённая з/п - 30000, поэтому попросили заполнить всё в начале этим значением. 
+--Напишите Update, который поставит всем з/п - 30000. Ещё з/п не может быть null, поэтому сделайте ALTER на добавление NOT NULL.
+
+alter table employee
+add column salary integer
+
+update employee set salary = 30000
+where employee.id is not null
+
+alter table employee
+alter column salary set not null
+	
