@@ -212,5 +212,5 @@ update employee set salary = 30000
 where employee.id is not null
 
 alter table employee
-alter column salary set not null
+alter column salary set not NULL
 	
