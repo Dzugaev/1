@@ -13,21 +13,21 @@ from employee e, shop_employee se
 where se.shop_id = '1' and se.employee_id = e.id and se.shedule like '%Вторник%'
 group by e.name, e.surname, se.day_shedule
 
---3 Выведите клиентов, которые в любых магазинах компании за последние 14 дней потратили более 10000 рублей на покупки. (Больше 2000 рублей)
-with buy_sum as
-(
-	select cl.id as client_id , cl.name, cl.surname, clb.date_buy, sum (clb.quantity*pr.current_price) as total
+--3 Выведите клиентов, которые в любых магазинах компании за последние 14 дней потратили более 10000 рублей на покупки.
+
+with sum_buys as ( 
+	select clb.client_id, clb.date_buy, sum(pr.current_price * clb.quantity)
 	from client_buys clb
-	inner join shop_product shp on shp.id = clb.shop_product_id
-	inner join product pr on pr.id = shp.product_id
-	inner join client cl on clb.client_id = cl.id 
-	where clb.client_id = cl.id 
-	group by   cl.id, cl.name, cl.surname, clb.date_buy
-	order by cl.id
-)
-select bs.name, bs.surname
-from buy_sum bs
-where total > 2000 and (current_date - date_buy::date)<14
+	inner join shop_product shp on clb.shop_product_id = shp.id
+	inner join product pr on shp.product_id = pr.id
+	group by clb.client_id, clb.date_buy
+	order by clb.client_id
+	)
+
+select *
+from sum_buys sb
+where (sb.sum > 2000) and (current_date - sb.date_buy::date)<=14
+
 
 --4 Выведите 25% (можете увеличить процент) клиентов, которые потратили за последние 240 часов наибольшую сумму.
 with buy_sum as
@@ -182,11 +182,64 @@ where (COALESCE(s.week1, 0)+ COALESCE(s.week2, 0) + COALESCE(s.week3, 0) + COALE
 group by w.id
 
 
---8 Для заданного сотрудника выведите его месячный график работы.
-select e.name, e.surname, se.shedule, se.day_shedule
+-- 8 Для заданного сотрудника выведите его месячный график работы.
+select e.name, e.surname, se.shedule as "1-7", se.shedule as "7-14", se.shedule as "14-21", se.shedule as "21-28", se.day_shedule
 from employee e
 inner join shop_employee se on e.id = se.employee_id 
 where e.id = 1
+
+
+--9 Для всех товаров в магазине выведите цену в таком виде:
+select pr.name,  COALESCE(-wk2.w1, 0) as "Неделя - 2",COALESCE(-wk1.w1,0) as "Неделя - 1", pr.current_price as "Текущая", COALESCE(-wk3.w1,0) as "Следующая неделя", COALESCE(-wk4.w1,0) as "Неделя + 2"
+from product pr
+LEFT JOIN (
+	select *, (100-(((prr.price::float) * 100)/(prr.current_price:: float )))::integer as "w1"
+	from ( select pr.id, pr.current_price, ps.date_finish, ps.price
+				from product pr
+				inner join price_story ps on pr.id = ps.product_id
+			  ) as prr
+	where (current_date - date_finish) <=7 and (current_date >  date_finish)
+	) as wk1
+ON pr.id = wk1.id
+LEFT JOIN (
+	select *, (100-(((prr.price::float) * 100)/(prr.current_price:: float )))::integer as "w1"
+	from ( select pr.id, pr.current_price, ps.date_finish, ps.price
+				from product pr
+				inner join price_story ps on pr.id = ps.product_id
+			  ) as prr
+	where (current_date - date_finish) <=14 and (current_date >  date_finish) and (current_date - date_finish) > 7
+	) as wk2
+ON pr.id = wk2.id
+LEFT JOIN (
+	select *, (100-(((prr.price::float) * 100)/(prr.current_price:: float )))::integer as "w1"
+	from ( select pr.id, pr.current_price, ps.date_finish, ps.price
+				from product pr
+				inner join price_story ps on pr.id = ps.product_id
+			  ) as prr
+	where (date_finish - current_date ) <=14 and (current_date < date_finish)
+	) as wk3
+ON pr.id = wk3.id
+LEFT JOIN (
+	select *, (100-(((prr.price::float) * 100)/(prr.current_price:: float )))::integer as "w1"
+	from ( select pr.id, pr.current_price, ps.date_finish, ps.price
+				from product pr
+				inner join price_story ps on pr.id = ps.product_id
+			  ) as prr
+	where (date_finish - current_date ) >=14 and (current_date < date_finish) and (current_date - date_finish) < 21
+	) as wk4
+ON pr.id = wk4.id
+
+
+--11 Клиент может отказаться от карты лояльности, в таком случае, согласно GDPR хранить его данные нельзя.
+--Объясните, как правильно организовать такое удаление, напишите запрос(ы).
+DELETE from discount_client 
+where client_id = 11
+
+DELETE from client_buys --(не думаю что нужно удалять, так как данные не клиента, а магазина, но на всякий случай)
+where client_id = 11
+
+DELETE from сlient 
+where id = 11
 
 
 --12 Для заданного поставщика выведите в заданном магазине сотрудника, который принимал их товар наибольшее количество раз. "Solo" shop-1
@@ -200,6 +253,21 @@ where e.id = 1
 	group by e.name, e.surname
 	order by times desc
 	limit 1 
+
+-- 13 Посчитайте относительную (напр.: 25%) и абсолютную (напр.: 35 р.) наценку на каждый товар в момент последней поставки.
+select tab.realname, (tab.current_price - tab.price) as "absolute"	,  (100-(((tab.price::float) * 100)/(tab.current_price:: float )))::integer as "dependens"
+from (
+	select *
+	from (
+		select distinct  ss.name as realname , max(sh.date_shipment),   ss.price
+		from supplier_stuff ss
+		inner join shipment sh  on ss.id = sh.supplier_stuff_id
+		group by  realname , ss.price
+		order by realname 
+	) as y
+	inner join product pr on pr.name = y.realname
+) as tab
+
 
 --15 Появилась задача хранить зарплаты сотрудников. Подумайте, как можно это хранить и напишите запрос для изменения базы данных. 
 --Бухгалтерия сообщила, что самая распространённая з/п - 30000, поэтому попросили заполнить всё в начале этим значением. 
