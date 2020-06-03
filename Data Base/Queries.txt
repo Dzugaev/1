@@ -269,6 +269,36 @@ from (
 ) as tab
 
 
+ --14 Посчитайте для каждого магазина доходы и расходы на последнюю неделю. 
+ --Подумайте, какая очевидная проблема есть в расчёте и как можно её устранить.
+
+with profit as (
+select t1.shop_id , sum(t1.quantity * t1.current_price) as income
+from (
+	select  spr.shop_id, clb.quantity, pr.id as prod_id, pr.current_price    
+	from client_buys clb
+	inner join shop_product spr on spr.id = clb.shop_product_id
+	inner join product pr on pr.id = spr.product_id 
+) as t1
+group by t1.shop_id
+order by t1.shop_id
+ ) 
+ 
+select *
+from (
+	select t2.shop_id,  sum (t2.price * t2.quantity) as waste
+	from (
+		 select s.shop_id, s.quantity, ss.price
+		 from shipment s
+		 inner join supplier_stuff ss on ss.id = s.supplier_stuff_id
+	 ) as t2
+	group by t2.shop_id
+	order by t2.shop_id
+) as loss
+LEFT JOIN profit ON  loss.shop_id = profit.shop_id
+
+
+
 --15 Появилась задача хранить зарплаты сотрудников. Подумайте, как можно это хранить и напишите запрос для изменения базы данных. 
 --Бухгалтерия сообщила, что самая распространённая з/п - 30000, поэтому попросили заполнить всё в начале этим значением. 
 --Напишите Update, который поставит всем з/п - 30000. Ещё з/п не может быть null, поэтому сделайте ALTER на добавление NOT NULL.
