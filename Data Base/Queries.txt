@@ -210,7 +210,7 @@ LEFT JOIN (
 	where (current_date - date_finish) <=14 and (current_date >  date_finish) and (current_date - date_finish) > 7
 	) as wk2
 ON pr.id = wk2.id
-LEFT JOIN (
+LEFT JOIN ( 
 	select *, (100-(((prr.price::float) * 100)/(prr.current_price:: float )))::integer as "w1"
 	from ( select pr.id, pr.current_price, ps.date_finish, ps.price
 				from product pr
